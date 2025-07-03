@@ -65,6 +65,7 @@
             backdrop-filter: blur(10px);
             z-index: 1;
             position: relative;
+            margin-bottom: 20px; /* Added margin to separate from canvas */
         }
         h1 {
             font-size: 3.5em;
@@ -101,6 +102,12 @@
             color: #777;
             z-index: 1;
         }
+        #audioVisualizer {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -110,10 +117,80 @@
     <div class="gate-container">
         <h1>honggochu의 역작</h1>
         <p>이곳에 오신 것을 환영합니다.</p>
-        <button class="action-button" onclick="alert('환영합니다!')">시작하기</button>
+        <button class="action-button" id="startButton">마이크 시작하기</button>
     </div>
+    <canvas id="audioVisualizer" width="600" height="200"></canvas>
     <div class="footer">
         &copy; 2025 honggochu. All rights reserved.
     </div>
+
+    <script>
+        const startButton = document.getElementById('startButton');
+        const canvas = document.getElementById('audioVisualizer');
+        const canvasCtx = canvas.getContext('2d');
+
+        let audioContext;
+        let analyser;
+        let dataArray;
+        let source;
+
+        startButton.addEventListener('click', initAudioVisualizer);
+
+        function initAudioVisualizer() {
+            if (audioContext) { // Prevent re-initialization
+                return;
+            }
+
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 2048;
+            const bufferLength = analyser.frequencyBinCount;
+            dataArray = new Uint8Array(bufferLength);
+
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(function(stream) {
+                    source = audioContext.createMediaStreamSource(stream);
+                    source.connect(analyser);
+                    draw();
+                    startButton.textContent = '마이크 활성화됨';
+                    startButton.disabled = true;
+                })
+                .catch(function(err) {
+                    console.error('마이크 접근 에러: ' + err);
+                    alert('마이크 접근에 실패했습니다. 브라우저 설정에서 마이크 권한을 허용해주세요.');
+                });
+        }
+
+        function draw() {
+            requestAnimationFrame(draw);
+
+            analyser.getByteTimeDomainData(dataArray);
+
+            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+            canvasCtx.lineWidth = 2;
+            canvasCtx.strokeStyle = 'rgb(0, 255, 0)'; // Green waveform
+
+            canvasCtx.beginPath();
+
+            const sliceWidth = canvas.width * 1.0 / dataArray.length;
+            let x = 0;
+
+            for (let i = 0; i < dataArray.length; i++) {
+                const v = dataArray[i] / 128.0;
+                const y = v * canvas.height / 2;
+
+                if (i === 0) {
+                    canvasCtx.moveTo(x, y);
+                } else {
+                    canvasCtx.lineTo(x, y);
+                }
+
+                x += sliceWidth;
+            }
+
+            canvasCtx.lineTo(canvas.width, canvas.height / 2);
+            canvasCtx.stroke();
+        }
+    </script>
 </body>
 </html>
