@@ -96,8 +96,8 @@
     <script>
         let scene, camera, renderer;
         const cars = [];
-        const trackLength = 100; // Length of the track
-        const carSpeed = 0.1; // Speed of cars
+        const trackLength = 200; // Increased track length for more speed feel
+        const carSpeed = 0.5; // Increased car speed for more speed feel
 
         function initThreeJS() {
             const container = document.getElementById('threejs-background');
@@ -108,8 +108,8 @@
 
             // Camera
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 10, 20); // Position camera to view track
-            camera.lookAt(0, 0, 0); // Look at the center of the track
+            camera.position.set(0, 2, 5); // Closer to the track, slightly above
+            camera.lookAt(0, 0, -10); // Look further down the track to emphasize speed
 
             // Renderer
             renderer = new THREE.WebGLRenderer({ antialias: true });
