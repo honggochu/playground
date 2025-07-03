@@ -65,7 +65,7 @@
             backdrop-filter: blur(10px);
             z-index: 1;
             position: relative;
-            margin-bottom: 20px; /* Added margin to separate from canvas */
+            margin-bottom: 20px;
         }
         h1 {
             font-size: 3.5em;
@@ -102,18 +102,14 @@
             color: #777;
             z-index: 1;
         }
-        #audioVisualizer {
-            background-color: rgba(0, 0, 0, 0.7);
+        #threejs-container {
+            width: 800px;
+            height: 400px;
+            background-color: #222;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             margin-top: 20px;
-        }
-        #audioLevel {
-            font-size: 2em;
-            font-weight: bold;
-            color: #e74c3c;
-            margin-top: 10px;
-            margin-bottom: 10px;
+            overflow: hidden;
         }
     </style>
 </head>
@@ -126,30 +122,53 @@
         <p>이곳에 오신 것을 환영합니다.</p>
         <button class="action-button" id="startButton">마이크 시작하기</button>
     </div>
-    <div id="audioLevel">음량: 0</div>
-    <canvas id="audioVisualizer" width="600" height="200"></canvas>
+    <div id="threejs-container"></div>
     <div class="footer">
         &copy; 2025 honggochu. All rights reserved.
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         const startButton = document.getElementById('startButton');
-        const canvas = document.getElementById('audioVisualizer');
-        const canvasCtx = canvas.getContext('2d');
-        const audioLevelDisplay = document.getElementById('audioLevel');
+        const threejsContainer = document.getElementById('threejs-container');
 
         let audioContext;
         let analyser;
         let dataArray;
         let source;
 
-        startButton.addEventListener('click', initAudioVisualizer);
+        let scene, camera, renderer, sphere;
 
-        function initAudioVisualizer() {
+        startButton.addEventListener('click', initThreeJSAndAudio);
+
+        function initThreeJSAndAudio() {
             if (audioContext) { // Prevent re-initialization
                 return;
             }
 
+            // Three.js Setup
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, threejsContainer.clientWidth / threejsContainer.clientHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(threejsContainer.clientWidth, threejsContainer.clientHeight);
+            threejsContainer.appendChild(renderer.domElement);
+
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0x404040); // soft white light
+            scene.add(ambientLight);
+            const pointLight = new THREE.PointLight(0xffffff, 1, 100);
+            pointLight.position.set(5, 5, 5);
+            scene.add(pointLight);
+
+            // Create the sphere
+            const geometry = new THREE.SphereGeometry(1, 32, 32);
+            const material = new THREE.MeshStandardMaterial({ color: 0x0077ff, metalness: 0.5, roughness: 0.5 });
+            sphere = new THREE.Mesh(geometry, material);
+            scene.add(sphere);
+
+            camera.position.z = 5; // Initial camera position
+
+            // Audio Setup
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
             analyser = audioContext.createAnalyser();
             analyser.fftSize = 2048;
@@ -160,7 +179,7 @@
                 .then(function(stream) {
                     source = audioContext.createMediaStreamSource(stream);
                     source.connect(analyser);
-                    draw();
+                    animate(); // Start Three.js animation loop
                     startButton.textContent = '마이크 활성화됨';
                     startButton.disabled = true;
                 })
@@ -170,8 +189,8 @@
                 });
         }
 
-        function draw() {
-            requestAnimationFrame(draw);
+        function animate() {
+            requestAnimationFrame(animate);
 
             analyser.getByteTimeDomainData(dataArray);
 
@@ -180,34 +199,29 @@
             for (let i = 0; i < dataArray.length; i++) {
                 sum += Math.abs(dataArray[i] - 128); // 128 is the zero point for Uint8Array
             }
-            const average = (sum / dataArray.length).toFixed(2);
-            audioLevelDisplay.textContent = `음량: ${average}`;
+            const averageAmplitude = sum / dataArray.length;
 
-            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-            canvasCtx.lineWidth = 2;
-            canvasCtx.strokeStyle = 'rgb(0, 255, 0)'; // Green waveform
+            // Map amplitude to sphere Z position
+            // Max amplitude is 128 (from 0-255, 128 is center). Let's map 0-128 to a Z range.
+            // Sphere starts at z=0. Moving forward means decreasing Z.
+            // Let's say max forward movement is -3 units.
+            const maxZMovement = -3;
+            const minZMovement = 0; // Sphere's initial Z position
+            const mappedZ = minZMovement + (averageAmplitude / 128) * (maxZMovement - minZMovement);
 
-            canvasCtx.beginPath();
+            sphere.position.z = mappedZ;
 
-            const sliceWidth = canvas.width * 1.0 / dataArray.length;
-            let x = 0;
-
-            for (let i = 0; i < dataArray.length; i++) {
-                const v = dataArray[i] / 128.0;
-                const y = v * canvas.height / 2;
-
-                if (i === 0) {
-                    canvasCtx.moveTo(x, y);
-                } else {
-                    canvasCtx.lineTo(x, y);
-                }
-
-                x += sliceWidth;
-            }
-
-            canvasCtx.lineTo(canvas.width, canvas.height / 2);
-            canvasCtx.stroke();
+            renderer.render(scene, camera);
         }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (camera && renderer && threejsContainer) {
+                camera.aspect = threejsContainer.clientWidth / threejsContainer.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(threejsContainer.clientWidth, threejsContainer.clientHeight);
+            }
+        });
     </script>
 </body>
 </html>
