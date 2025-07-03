@@ -256,7 +256,7 @@
             drawFrequencyGraph(lowFrequencyCanvas, lowFrequencyCanvasCtx, lowFreqData, 'rgb(255, 165, 0)'); // Orange
 
             // High frequencies (e.g., bins 200-400)
-            const highFreqData = frequencyDataArray.slice(200, 400);
+            const highFreqData = frequencyDataArray.slice(200, 600);
             drawFrequencyGraph(highFrequencyCanvas, highFrequencyCanvasCtx, highFreqData, 'rgb(255, 0, 255)'); // Magenta
 
             renderer.render(scene, camera);
