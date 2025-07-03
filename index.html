@@ -79,6 +79,126 @@
         .game-button.create-room:hover { background-color: #f39c12; }
         .game-button.settings { background-color: #9b59b6; } /* Purple */
         .game-button.settings:hover { background-color: #8e44ad; }
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 100; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.7); /* Black w/ opacity */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #34495e;
+            margin: auto;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 80%;
+            max-width: 500px;
+            position: relative;
+            color: #ecf0f1;
+            text-align: left;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .modal-content h2 {
+            text-align: center;
+            color: #e74c3c;
+            margin-bottom: 25px;
+        }
+
+        .setting-item {
+            margin-bottom: 20px;
+        }
+
+        .setting-item label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .setting-item input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none; /* Override default look */
+            height: 8px;
+            background: #555;
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+        }
+
+        .setting-item input[type="range"]:hover {
+            opacity: 1;
+        }
+
+        .setting-item input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+        }
+
+        .setting-item input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+        }
+
+        .setting-item span {
+            margin-left: 10px;
+            font-size: 1em;
+            color: #ccc;
+        }
+
+        .setting-item select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background-color: #444;
+            color: #ecf0f1;
+            font-size: 1em;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ecf0f1%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.2-6.4H18.2c-4.8%200-9.3%201.8-12.9%205.9-3.6%204.1-5.5%209.6-5.3%2015.2%200%205.6%202.1%2010.9%205.9%2014.9l128.9%20128.9c3.9%203.9%209%206%2014.4%206s10.5-2.1%2014.4-6L287%20100.3c3.8-4%205.9-9.3%205.9-14.9.1-5.6-1.8-11.1-5.7-15.2z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -89,6 +209,43 @@
             <button class="game-button find-room">방 찾기</button>
             <button class="game-button create-room">방 생성하기</button>
             <button class="game-button settings">설정</button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>설정</h2>
+
+            <div class="setting-item">
+                <label for="bgmVolume">배경 음악:</label>
+                <input type="range" id="bgmVolume" min="0" max="100" value="50">
+                <span id="bgmVolumeValue">50</span>
+            </div>
+
+            <div class="setting-item">
+                <label for="sfxVolume">효과음:</label>
+                <input type="range" id="sfxVolume" min="0" max="100" value="70">
+                <span id="sfxVolumeValue">70</span>
+            </div>
+
+            <div class="setting-item">
+                <label for="micInput">마이크 설정:</label>
+                <select id="micInput">
+                    <option value="default">기본 마이크</option>
+                    <option value="mic1">마이크 1</option>
+                    <option value="mic2">마이크 2</option>
+                </select>
+            </div>
+
+            <div class="setting-item">
+                <label for="language">언어 설정:</label>
+                <select id="language">
+                    <option value="ko">한국어</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
         </div>
     </div>
 
@@ -108,8 +265,8 @@
 
             // Camera
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 2, 5); // Closer to the track, slightly above
-            camera.lookAt(0, 0, -10); // Look further down the track to emphasize speed
+            camera.position.set(0, 5, 10); // Raised camera position, slightly further back
+            camera.lookAt(0, 0, -20); // Look further down the track
 
             // Renderer
             renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -169,6 +326,41 @@
         });
 
         initThreeJS();
+
+        // Settings Modal Logic
+        const settingsButton = document.querySelector('.game-button.settings');
+        const settingsModal = document.getElementById('settingsModal');
+        const closeButton = document.querySelector('.close-button');
+
+        settingsButton.addEventListener('click', () => {
+            settingsModal.style.display = 'flex'; // Show the modal
+        });
+
+        closeButton.addEventListener('click', () => {
+            settingsModal.style.display = 'none'; // Hide the modal
+        });
+
+        // Hide modal if clicked outside content
+        window.addEventListener('click', (event) => {
+            if (event.target == settingsModal) {
+                settingsModal.style.display = 'none';
+            }
+        });
+
+        // Volume slider logic
+        const bgmVolume = document.getElementById('bgmVolume');
+        const bgmVolumeValue = document.getElementById('bgmVolumeValue');
+        bgmVolume.addEventListener('input', (event) => {
+            bgmVolumeValue.textContent = event.target.value;
+            // Here you would update your actual BGM volume
+        });
+
+        const sfxVolume = document.getElementById('sfxVolume');
+        const sfxVolumeValue = document.getElementById('sfxVolumeValue');
+        sfxVolume.addEventListener('input', (event) => {
+            sfxVolumeValue.textContent = event.target.value;
+            // Here you would update your actual SFX volume
+        });
     </script>
 </body>
 </html>
