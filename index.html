@@ -211,6 +211,56 @@
         .password-input-container {
             margin-top: 10px;
         }
+
+        /* Room List Specific Styles */
+        .room-list-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 columns */
+            gap: 20px;
+            max-height: 400px; /* Limit height for scrollbar */
+            overflow-y: auto;
+            padding-right: 10px; /* Space for scrollbar */
+        }
+
+        .room-item {
+            background-color: #2c3e50;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .room-item h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #3498db;
+            font-size: 1.2em;
+        }
+
+        .room-item p {
+            margin: 5px 0;
+            font-size: 0.9em;
+            color: #bdc3c7;
+        }
+
+        .room-item .join-button {
+            background-color: #2ecc71;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+            align-self: flex-end; /* Align button to the right */
+        }
+
+        .room-item .join-button:hover {
+            background-color: #27ae60;
+        }
     </style>
 </head>
 <body>
@@ -303,6 +353,17 @@
         </div>
     </div>
 
+    <!-- Find Room Modal -->
+    <div id="findRoomModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button find-room-close">&times;</span>
+            <h2>방 찾기</h2>
+            <div class="room-list-grid" id="roomListGrid">
+                <!-- Room items will be dynamically loaded here -->
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         let scene, camera, renderer;
@@ -319,8 +380,8 @@
 
             // Camera
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 5, 10); // Raised camera position, slightly further back
-            camera.lookAt(0, 0, -20); // Look further down the track
+            camera.position.set(0, 10, 15); // Raised camera position, slightly further back
+            camera.lookAt(0, 0, -30); // Look further down the track
 
             // Renderer
             renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -446,6 +507,56 @@
                 passwordInputContainer.style.display = 'none';
             }
         });
+
+        // Find Room Modal Logic
+        const findRoomButton = document.querySelector('.game-button.find-room');
+        const findRoomModal = document.getElementById('findRoomModal');
+        const findRoomCloseButton = findRoomModal.querySelector('.find-room-close');
+        const roomListGrid = document.getElementById('roomListGrid');
+
+        findRoomButton.addEventListener('click', () => {
+            loadRooms(); // Load rooms when the modal is opened
+            findRoomModal.style.display = 'flex'; // Show the modal
+        });
+
+        findRoomCloseButton.addEventListener('click', () => {
+            findRoomModal.style.display = 'none'; // Hide the modal
+        });
+
+        // Hide modal if clicked outside content
+        window.addEventListener('click', (event) => {
+            if (event.target == findRoomModal) {
+                findRoomModal.style.display = 'none';
+            }
+        });
+
+        // Dummy room data
+        const dummyRooms = [
+            { id: 1, title: "홍길동의 방", mode: "1인용", map: "도시", password: false },
+            { id: 2, title: "김철수의 방", mode: "2인용", map: "사막", password: true },
+            { id: 3, title: "영희의 방", mode: "1인용", map: "설원", password: false },
+            { id: 4, title: "바둑이의 방", mode: "2인용", map: "도시", password: false },
+            { id: 5, title: "철수의 방", mode: "1인용", map: "사막", password: true },
+            { id: 6, title: "미애의 방", mode: "2인용", map: "설원", password: false },
+            { id: 7, title: "새로운 방 1", mode: "1인용", map: "도시", password: false },
+            { id: 8, title: "새로운 방 2", mode: "2인용", map: "사막", password: true },
+        ];
+
+        function loadRooms() {
+            roomListGrid.innerHTML = ''; // Clear existing rooms
+            dummyRooms.forEach(room => {
+                const roomItem = document.createElement('div');
+                roomItem.classList.add('room-item');
+                roomItem.innerHTML = `
+                    <h3>${room.title}</h3>
+                    <p>모드: ${room.mode}</p>
+                    <p>맵: ${room.map}</p>
+                    <p>비밀번호: ${room.password ? '있음' : '없음'}</p>
+                    <button class="join-button">참가하기</button>
+                `;
+                roomListGrid.appendChild(roomItem);
+            });
+        }
     </script>
 </body>
 </html>
