@@ -1,3 +1,10 @@
+@font-face {
+  font-family: 'UhBeeZZIBA';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2104@1.0/UhBeeZZIBA-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
     --bubblegum-pink: #ff6ec7;
     --sky-blue: #a5f3fc;
@@ -14,12 +21,12 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Noto Sans KR', sans-serif;
+    font-family: 'UhBeeZZIBA', 'Baloo 2', 'Fredoka', cursive;
+    background: linear-gradient(145deg, #dff1ff, #e6d4ff);
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, var(--deep-indigo) 0%, #4a4d91 100%);
     color: var(--snow-white);
     text-align: center;
     overflow: hidden;
@@ -34,10 +41,10 @@ body {
     z-index: -1;
 }
 .main-container {
-    background-color: rgba(99, 102, 241, 0.8);
+    background-color: rgba(34, 27, 54, 0.8);
     padding: 50px 80px;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 10px 30px rgba(192, 188, 188, 0.655);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -82,7 +89,7 @@ h1 {
     background-color: var(--mint-green);
 }
 .game-button.find-room:hover {
-    background: linear-gradient(to right, #96ffbc, #a6ffcc); /* Brighter Mint Green */
+    background: linear-gradient(to right, #a4e7a5, #bcffa6); /* Brighter Mint Green */
 }
 .game-button.create-room {
     background-color: var(--lemon-yellow);

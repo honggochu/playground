@@ -1,4 +1,4 @@
-let scene, camera, renderer;
+let scene, camera, renderer, catModel;
         const cars = [];
         const trackLength = 200; // Increased track length for more speed feel
         const carSpeed = 0.5; // Increased car speed for more speed feel
@@ -47,6 +47,22 @@ let scene, camera, renderer;
                 scene.add(car);
             }
 
+            // Load Cat Model
+            const loader = new THREE.GLTFLoader();
+            loader.load(
+                './assets/models/cat.glb',
+                function (gltf) {
+                    catModel = gltf.scene;
+                    catModel.scale.set(0.5, 0.5, 0.5); // Adjust size as needed
+                    catModel.position.set(0, -0.5, 0); // Position at the bottom of the screen
+                    scene.add(catModel);
+                },
+                undefined,
+                function (error) {
+                    console.error('An error occurred while loading the cat model:', error);
+                }
+            );
+
             animate();
         }
 
@@ -61,6 +77,11 @@ let scene, camera, renderer;
                     car.position.x = Math.random() * 10 - 5; // Random x position
                 }
             });
+
+            // Cat animation (simple rotation for now)
+            if (catModel) {
+                catModel.rotation.y += 0.01; // Rotate the cat
+            }
 
             renderer.render(scene, camera);
         }
