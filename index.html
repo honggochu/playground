@@ -183,7 +183,9 @@
             color: #ccc;
         }
 
-        .setting-item select {
+        .setting-item select,
+        .setting-item input[type="text"],
+        .setting-item input[type="password"] {
             width: 100%;
             padding: 10px;
             border-radius: 5px;
@@ -194,10 +196,20 @@
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
+        }
+        .setting-item select {
             background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ecf0f1%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.2-6.4H18.2c-4.8%200-9.3%201.8-12.9%205.9-3.6%204.1-5.5%209.6-5.3%2015.2%200%205.6%202.1%2010.9%205.9%2014.9l128.9%20128.9c3.9%203.9%209%206%2014.4%206s10.5-2.1%2014.4-6L287%20100.3c3.8-4%205.9-9.3%205.9-14.9.1-5.6-1.8-11.1-5.7-15.2z%22%2F%3E%3C%2Fsvg%3E');
             background-repeat: no-repeat;
             background-position: right 10px top 50%;
             background-size: 12px;
+        }
+        .radio-group label {
+            display: inline-block;
+            margin-right: 15px;
+            font-weight: normal;
+        }
+        .password-input-container {
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -246,6 +258,48 @@
                     <option value="en">English</option>
                 </select>
             </div>
+        </div>
+    </div>
+
+    <!-- Create Room Modal -->
+    <div id="createRoomModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button create-room-close">&times;</span>
+            <h2>방 생성</h2>
+
+            <div class="setting-item">
+                <label for="roomTitle">방 제목:</label>
+                <input type="text" id="roomTitle" placeholder="방 제목을 입력하세요">
+            </div>
+
+            <div class="setting-item">
+                <label>모드 선택:</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="gameMode" value="single" checked> 1인용</label>
+                    <label><input type="radio" name="gameMode" value="multi"> 2인용</label>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <label for="mapSelect">맵 선택:</label>
+                <select id="mapSelect">
+                    <option value="map1">맵 1: 도시</option>
+                    <option value="map2">맵 2: 사막</option>
+                    <option value="map3">맵 3: 설원</option>
+                </select>
+            </div>
+
+            <div class="setting-item">
+                <label for="passwordToggle">비밀번호 설정:</label>
+                <input type="checkbox" id="passwordToggle">
+            </div>
+
+            <div class="setting-item password-input-container" id="passwordInputContainer" style="display: none;">
+                <label for="roomPassword">비밀번호:</label>
+                <input type="password" id="roomPassword" placeholder="비밀번호를 입력하세요">
+            </div>
+
+            <button class="game-button" style="width: 100%;">방 생성</button>
         </div>
     </div>
 
@@ -330,13 +384,13 @@
         // Settings Modal Logic
         const settingsButton = document.querySelector('.game-button.settings');
         const settingsModal = document.getElementById('settingsModal');
-        const closeButton = document.querySelector('.close-button');
+        const settingsCloseButton = settingsModal.querySelector('.close-button');
 
         settingsButton.addEventListener('click', () => {
             settingsModal.style.display = 'flex'; // Show the modal
         });
 
-        closeButton.addEventListener('click', () => {
+        settingsCloseButton.addEventListener('click', () => {
             settingsModal.style.display = 'none'; // Hide the modal
         });
 
@@ -360,6 +414,37 @@
         sfxVolume.addEventListener('input', (event) => {
             sfxVolumeValue.textContent = event.target.value;
             // Here you would update your actual SFX volume
+        });
+
+        // Create Room Modal Logic
+        const createRoomButton = document.querySelector('.game-button.create-room');
+        const createRoomModal = document.getElementById('createRoomModal');
+        const createRoomCloseButton = createRoomModal.querySelector('.create-room-close');
+        const passwordToggle = document.getElementById('passwordToggle');
+        const passwordInputContainer = document.getElementById('passwordInputContainer');
+
+        createRoomButton.addEventListener('click', () => {
+            createRoomModal.style.display = 'flex'; // Show the modal
+        });
+
+        createRoomCloseButton.addEventListener('click', () => {
+            createRoomModal.style.display = 'none'; // Hide the modal
+        });
+
+        // Hide modal if clicked outside content
+        window.addEventListener('click', (event) => {
+            if (event.target == createRoomModal) {
+                createRoomModal.style.display = 'none';
+            }
+        });
+
+        // Toggle password input visibility
+        passwordToggle.addEventListener('change', () => {
+            if (passwordToggle.checked) {
+                passwordInputContainer.style.display = 'block';
+            } else {
+                passwordInputContainer.style.display = 'none';
+            }
         });
     </script>
 </body>
