@@ -103,10 +103,15 @@
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             width: 80%;
-            max-width: 500px;
+            max-width: 500px; /* Default max-width */
             position: relative;
             color: #ecf0f1;
             text-align: left;
+        }
+
+        /* Specific max-width for Find Room Modal */
+        #findRoomModal .modal-content {
+            max-width: 800px; /* Wider for room list */
         }
 
         .close-button {
@@ -364,6 +369,19 @@
         </div>
     </div>
 
+    <!-- Password Input Modal -->
+    <div id="passwordInputModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button password-input-close">&times;</span>
+            <h2>비밀번호 입력</h2>
+            <div class="setting-item">
+                <label for="joinPassword">비밀번호:</label>
+                <input type="password" id="joinPassword" placeholder="비밀번호를 입력하세요">
+            </div>
+            <button class="game-button" id="submitPassword" style="width: 100%;">확인</button>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         let scene, camera, renderer;
@@ -530,16 +548,41 @@
             }
         });
 
+        // Password Input Modal Logic
+        const passwordInputModal = document.getElementById('passwordInputModal');
+        const passwordInputCloseButton = passwordInputModal.querySelector('.password-input-close');
+        const joinPasswordInput = document.getElementById('joinPassword');
+        const submitPasswordButton = document.getElementById('submitPassword');
+
+        passwordInputCloseButton.addEventListener('click', () => {
+            passwordInputModal.style.display = 'none';
+            joinPasswordInput.value = ''; // Clear password input
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target == passwordInputModal) {
+                passwordInputModal.style.display = 'none';
+                joinPasswordInput.value = '';
+            }
+        });
+
+        submitPasswordButton.addEventListener('click', () => {
+            const enteredPassword = joinPasswordInput.value;
+            alert(`비밀번호: ${enteredPassword}로 방에 참가 시도`);
+            passwordInputModal.style.display = 'none';
+            joinPasswordInput.value = '';
+        });
+
         // Dummy room data
         const dummyRooms = [
             { id: 1, title: "홍길동의 방", mode: "1인용", map: "도시", password: false },
-            { id: 2, title: "김철수의 방", mode: "2인용", map: "사막", password: true },
+            { id: 2, title: "김철수의 방", mode: "2인용", map: "사막", password: true, correctPassword: "1234" },
             { id: 3, title: "영희의 방", mode: "1인용", map: "설원", password: false },
             { id: 4, title: "바둑이의 방", mode: "2인용", map: "도시", password: false },
-            { id: 5, title: "철수의 방", mode: "1인용", map: "사막", password: true },
+            { id: 5, title: "철수의 방", mode: "1인용", map: "사막", password: true, correctPassword: "abcd" },
             { id: 6, title: "미애의 방", mode: "2인용", map: "설원", password: false },
             { id: 7, title: "새로운 방 1", mode: "1인용", map: "도시", password: false },
-            { id: 8, title: "새로운 방 2", mode: "2인용", map: "사막", password: true },
+            { id: 8, title: "새로운 방 2", mode: "2인용", map: "사막", password: true, correctPassword: "qwer" },
         ];
 
         function loadRooms() {
@@ -552,9 +595,34 @@
                     <p>모드: ${room.mode}</p>
                     <p>맵: ${room.map}</p>
                     <p>비밀번호: ${room.password ? '있음' : '없음'}</p>
-                    <button class="join-button">참가하기</button>
+                    <button class="join-button" data-room-id="${room.id}">참가하기</button>
                 `;
                 roomListGrid.appendChild(roomItem);
+            });
+
+            // Attach event listeners to join buttons after rooms are loaded
+            document.querySelectorAll('.join-button').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const roomId = event.target.dataset.roomId;
+                    const room = dummyRooms.find(r => r.id == roomId);
+
+                    if (room && room.password) {
+                        passwordInputModal.style.display = 'flex';
+                        // Store room ID or other info if needed for password verification
+                        submitPasswordButton.onclick = () => {
+                            const enteredPassword = joinPasswordInput.value;
+                            if (enteredPassword === room.correctPassword) {
+                                alert(`${room.title}에 성공적으로 참가했습니다!`);
+                                passwordInputModal.style.display = 'none';
+                                joinPasswordInput.value = '';
+                            } else {
+                                alert('비밀번호가 틀렸습니다.');
+                            }
+                        };
+                    } else if (room) {
+                        alert(`${room.title}에 참가했습니다!`);
+                    }
+                });
             });
         }
     </script>
